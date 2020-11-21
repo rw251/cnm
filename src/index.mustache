@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#2d89ef">
+  <meta name="theme-color" content="#cae8d1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <meta name="Description" content="UK map of confirmed cases for each week. Level of detail is local area. MSOA. Medium level super output area.">
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width:100%; 
+      height:100%; 
+      overflow: hidden;
+    }
+    #mapbox {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #map {
+      position: absolute;
+      margin:0; 
+      padding:0;
+      display: block;
+    }
+
+    #map.dragging {
+      cursor: grab;
+    }
+
+    #highlight {
+      position: absolute;
+      margin:0; 
+      padding:0;
+      display: block;
+      pointer-events: none;
+    }
+    #hoverdata {
+      position: absolute;
+      left:10px;
+      top:10px;
+      font-size:40px;
+    }
+    #mySlider {
+      width: 50%;
+      max-width: 400px;
+      position: absolute;
+      top: 225px;
+      left: 13.5px;
+    }
+    .slider {
+      width: calc(100% - 76px);
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+      margin: 0;
+      height: 32px;
+      vertical-align: middle;
+    }
+
+    .slider:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="mapbox"></div>
+  <canvas id="map"></canvas>
+  <canvas id="highlight"></canvas>
+  <div id="hoverdata">
+    <div id="date"></div>
+    <div id="rate"></div>
+  </div>
+  <div id="mySlider">
+    <input type="button" class="moveDate" id="downButton" value="<">
+    <input type="range" min="0" max="50" value="50" class="slider" id="myRange">
+    <input type="button" class="moveDate" id="upButton" value=">">
+  </div>
+  <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+  <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,fetch"></script>
+  <script src="/{{ scriptFile }}"></script>
+</body>
+</html>
