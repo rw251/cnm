@@ -9,15 +9,15 @@ npm --version
 
 npm config set prefix $BASE_DIR/.npm-packages
 
-cd $BASE_DIR/cron/covid
+cd $BASE_DIR/cron/covid2
 
-node $BASE_DIR/cron/covid/update.js
+node $BASE_DIR/cron/covid2/update.js
 
 npm run tidy-ltla
 npm run tidy-msoa
 
-cp $BASE_DIR/cron/covid/data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
-cp $BASE_DIR/cron/covid/data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
+cp $BASE_DIR/cron/covid2/data-ltla.json $BASE_DIR/public_html/covid2/data-ltla.json
+cp $BASE_DIR/cron/covid2/data-msoa.json $BASE_DIR/public_html/covid2/data-msoa.json
 
 npm run minify-ltla
 npm run minify-msoa
