@@ -18,6 +18,7 @@
     "@babel/preset-env": "^7.12.1",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
+    "inquirer": "^7.3.3",
     "mapbox-gl": "^1.12.0",
     "mustache": "^4.0.1",
     "rimraf": "^3.0.2",
@@ -29,8 +30,13 @@
   "scripts": {
     "start": "concurrently -kill-others-on-fail \"npm run watch\" \"npm run serve\"",
     "build": "rollup -c",
+    "build:production": "rollup -c --environment PRODUCTION",
+    "predeploy": "node deploy.js",
+    "deploy": "concurrently -kill-others-on-fail \"npm run deploy:client\" \"npm run deploy:cron\"",
+    "predeploy:client": "npm run build:production",
+    "deploy:client": "rsync -az --force --delete --progress -e 'ssh' ./public_html/covid/ rw251.com:~/public_html/covid2 --exclude=/.ssh --exclude=/data-ltla.json --exclude=/data-ltla.min.json --exclude=/data-msoa.json --exclude=/data-msoa.min.json --exclude=/.logs --exclude=/.cagefs --exclude=/.cl.selector --exclude=/.bash_history",
+    "deploy:cron": "rsync -az --force --delete --progress -e 'ssh' ./harvester/covid/ rw251.com:~/cron/covid2 --exclude=/.ssh --exclude=/.logs --exclude=/.cagefs --exclude=/.cl.selector --exclude=/.bash_history --exclude=/node_modules --chmod=Fu=rwx,Fog=rwx",
     "serve": "http-server ./public_html/covid -p 3998 -a localhost -c-1 -o",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "rollup -c -w"
   },
   "keywords": [],
