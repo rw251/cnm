@@ -1,14 +1,22 @@
 const fs = require('fs');
 const { join } = require('path');
 
-const dataFile = join(__dirname, 'data-ltla.json');
-const dataMsoaFile = join(__dirname, 'data-msoa.json');
+const dataFile = join(__dirname, 'temp', 'data-ltla.json');
+const dataMsoaFile = join(__dirname, 'temp', 'data-msoa.json');
 
 const getMsoaData = () => {
-  const x = JSON.parse(fs.readFileSync('msoa_data_latest.geojson', 'utf8'));
+  console.log('Loading msoa data...');
+  const x = fs.readFileSync(join(__dirname, 'temp', 'msoa_data_latest.geojson'), 'utf8');
+  console.log('Splitting...');
+  const y = x.split('},{"id');
+  const features = [];
+  features.push(JSON.parse('{"id' + y[0].split('{"id')[1] + '}'));
+  for (let i = 1; i < y.length - 2; i++) {
+    features.push(JSON.parse('{"id' + y[i] + '}'));
+  }
 
   const obj = {};
-  x.features.forEach((feature) => {
+  features.forEach((feature) => {
     const { code, ...rest } = feature.properties;
     if (!obj[code]) {
       obj[code] = { dt: [] };
@@ -19,7 +27,9 @@ const getMsoaData = () => {
 };
 
 const getLtlaData = () => {
-  const x = JSON.parse(fs.readFileSync('ltla_data_latest.geojson', 'utf8'));
+  const x = JSON.parse(
+    fs.readFileSync(join(__dirname, 'temp', 'ltla_data_latest.geojson'), 'utf8')
+  );
 
   const obj = {};
   x.features.forEach((feature) => {
@@ -76,7 +86,10 @@ const msoaData = getMsoaData();
 
 const { ltlaProcessedData, msoaProcessedData } = processData({ ltlaData, msoaData });
 
-ltlaProcessedData.latestUpdate = fs.readFileSync('website_timestamp', 'utf8');
+ltlaProcessedData.latestUpdate = fs.readFileSync(
+  join(__dirname, 'temp', 'website_timestamp'),
+  'utf8'
+);
 console.log('Writing data file');
 fs.writeFileSync(dataFile, JSON.stringify(ltlaProcessedData, null, 2).replace(/ {2}/g, '\t'));
 console.log('Writing msoa data file');

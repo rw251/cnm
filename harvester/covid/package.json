@@ -1,13 +1,10 @@
 {
   "scripts": {
-    "tidy-ltla": "prettier --write data-ltla.json",
-    "tidy-msoa": "prettier --write data-msoa.json",
     "minify-ltla": "json-minify ../../public_html/covid/data-ltla.json > ../../public_html/covid/data-ltla.min.json",
     "minify-msoa": "json-minify ../../public_html/covid/data-msoa.json > ../../public_html/covid/data-msoa.min.json"
   },
   "dependencies": {
     "json-minify": "^1.0.0",
-    "node-fetch": "^2.6.0",
-    "prettier": "^2.0.5"
+    "node-fetch": "^2.6.0"
   }
 }

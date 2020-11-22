@@ -11,25 +11,24 @@ npm config set prefix $BASE_DIR/.npm-packages
 
 cd $BASE_DIR/cron/covid
 
-wget -O website_timestamp 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp'
+mkdir -p temp
+
+wget -O temp/website_timestamp 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp'
 
 node shouldWeUpdate.js
 
-FILE=DO_IT
+FILE=temp/DO_IT
 if [ -f "$FILE" ]; then
 
-    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' > msoa_data_latest.geojson
-    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' > ltla_data_latest.geojson
+    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' > temp/msoa_data_latest.geojson
+    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' > temp/ltla_data_latest.geojson
 
     node update.js
 
-    rm DO_IT
+    rm temp/DO_IT
 
-    npm run tidy-ltla
-    npm run tidy-msoa
-
-    cp data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
-    cp data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
+    cp temp/data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
+    cp temp/data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
 
     npm run minify-ltla
     npm run minify-msoa
