@@ -11,15 +11,29 @@ npm config set prefix $BASE_DIR/.npm-packages
 
 cd $BASE_DIR/cron/covid
 
-node $BASE_DIR/cron/covid/update.js
+wget -O website_timestamp 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp'
 
-npm run tidy-ltla
-npm run tidy-msoa
+node shouldWeUpdate.js
 
-cp $BASE_DIR/cron/covid/data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
-cp $BASE_DIR/cron/covid/data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
+FILE=DO_IT
+if [ -f "$FILE" ]; then
 
-npm run minify-ltla
-npm run minify-msoa
+    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' > msoa_data_latest.geojson
+    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' > ltla_data_latest.geojson
+
+    node update.js
+
+    rm DO_IT
+
+    npm run tidy-ltla
+    npm run tidy-msoa
+
+    cp data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
+    cp data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
+
+    npm run minify-ltla
+    npm run minify-msoa
+fi
+
 
 echo END: $(date '+%Y %b %d %H:%M')
