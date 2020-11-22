@@ -71,17 +71,13 @@ const processData = ({ ltlaData, msoaData }) => {
   return { ltlaProcessedData: ltlaData, msoaProcessedData: msoaData };
 };
 
-const go = async () => {
-  const ltlaData = await getLtlaData();
-  const msoaData = await getMsoaData();
+const ltlaData = getLtlaData();
+const msoaData = getMsoaData();
 
-  const { ltlaProcessedData, msoaProcessedData } = processData({ ltlaData, msoaData });
+const { ltlaProcessedData, msoaProcessedData } = processData({ ltlaData, msoaData });
 
-  ltlaProcessedData.latestUpdate = fs.readFileSync('website_timestamp', 'utf8');
-  console.log('Writing data file');
-  fs.writeFileSync(dataFile, JSON.stringify(ltlaProcessedData, null, 2).replace(/ {2}/g, '\t'));
-  console.log('Writing msoa data file');
-  fs.writeFileSync(dataMsoaFile, JSON.stringify(msoaProcessedData, null, 2).replace(/ {2}/g, '\t'));
-};
-
-go();
+ltlaProcessedData.latestUpdate = fs.readFileSync('website_timestamp', 'utf8');
+console.log('Writing data file');
+fs.writeFileSync(dataFile, JSON.stringify(ltlaProcessedData, null, 2).replace(/ {2}/g, '\t'));
+console.log('Writing msoa data file');
+fs.writeFileSync(dataMsoaFile, JSON.stringify(msoaProcessedData, null, 2).replace(/ {2}/g, '\t'));
