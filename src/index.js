@@ -8,9 +8,15 @@ const mapContext = mapCanvas.getContext('2d');
 const highlightCanvas = document.getElementById('highlight');
 const highlightContext = highlightCanvas.getContext('2d');
 const slider = document.getElementById('myRange');
+const sliderWrapper = document.getElementById('mySlider');
 let mapCenterLNG = -2.6416415135265; //-2.5; // longitude
 let mapCenterLAT = 53.592328230096889; //54.5; //latitude
 let sliderMax;
+
+// Global vars to cache event state
+// used for pinch zooming
+var evCache = new Array();
+var prevDiff = -1;
 
 mapboxgl.accessToken =
   'pk.eyJ1IjoiMTIzNHJpY2hhcmR3aWxsaWFtcyIsImEiOiJja2Q3ZW1majkwMjFhMnRxcmhseDVpdWphIn0.-7Q7C7_uLQJgJqmPkgy-qw';
@@ -27,6 +33,41 @@ highlightContext.fillRect(0, 0, 100, 100);
 window.addEventListener('mousedown', startDrag);
 window.addEventListener('mousemove', drag);
 window.addEventListener('mouseup', endDrag);
+
+var scaling = false;
+var lastDist;
+var centre;
+window.ontouchstart = (e) => {
+  console.log('t start');
+  if (e.touches.length === 2) {
+    scaling = true;
+    lastDist = Math.hypot(
+      e.touches[0].pageX - e.touches[1].pageX,
+      e.touches[0].pageY - e.touches[1].pageY
+    );
+    centre = [
+      (e.touches[0].pageX + e.touches[1].pageX) / 2,
+      (e.touches[0].pageY + e.touches[1].pageY) / 2,
+    ];
+  }
+};
+window.ontouchmove = (e) => {
+  if (scaling) {
+    var dist = Math.hypot(
+      e.touches[0].pageX - e.touches[1].pageX,
+      e.touches[0].pageY - e.touches[1].pageY
+    );
+    if (dist > lastDist) zoomIn(centre[0], centre[1]);
+    else zoomOut(centre[0], centre[1]);
+    lastDist = dist;
+  }
+};
+window.ontouchend = (e) => {
+  if (scaling) {
+    // pinchEnd(e);
+    scaling = false;
+  }
+};
 
 // allow zooming
 window.addEventListener('dblclick', (e) => {
@@ -112,8 +153,8 @@ updateMapCentre();
 
 const getCanvasCoords = (lat, lng) => {
   const { x: webX, y: webY } = getWebMercator(lat, lng);
-  const x = webX - mapCentreX + mapCanvas.width / 2;
-  const y = webY - mapCentreY + mapCanvas.height / 2;
+  const x = Math.floor(webX - mapCentreX + mapCanvas.width / 2);
+  const y = Math.floor(webY - mapCentreY + mapCanvas.height / 2);
   return { x, y };
 };
 
@@ -273,16 +314,6 @@ function drawArea(coordinates, id, isHighlight, fillStyle = 'rgba(255,240,255,0.
 function updateHighlight() {
   if (!hitRegions) return;
   clearHighlight();
-  // Object.keys(hitRegions).forEach((x) => {
-  //   Object.keys(hitRegions[x]).forEach((y) => {
-  //     if (hitRegions[x][y].indexOf(region) > -1) {
-  //       highlightContext.beginPath();
-  //       highlightContext.rect(x * hitRegionSize, y * hitRegionSize, hitRegionSize, hitRegionSize);
-  //       highlightContext.stroke();
-  //     }
-  //   });
-  // });
-  // console.log(region);
 
   if (cachedGeoData[region]) {
     if (cachedGeoData[region].type === 'MultiPolygon') {
@@ -382,10 +413,14 @@ function resizeCanvas() {
 }
 
 let isDragging = false;
+let isSliding = false;
 let startX;
 let startY;
 function startDrag(e) {
-  if (e.target.tagName.toLowerCase() === 'input') return;
+  if (e.target.tagName.toLowerCase() === 'input') {
+    isSliding = true;
+    return;
+  }
   isDragging = true;
   startX = e.clientX;
   startY = e.clientY;
@@ -429,12 +464,13 @@ var distanceY;
 function dragUpdate() {
   needForRAF = true; // animation frame is happening now, so let another one queue up
   if (isDragging) {
-    // console.log('Do update');
     document.body.style.transform = `translate(${distanceX}px, ${distanceY}px)`;
+    sliderWrapper.style.transform = `translate(calc(-50% - ${distanceX}px), ${-distanceY}px)`;
   }
 }
 
 function drag(e) {
+  if (isSliding) return;
   if (isDragging) {
     if (needForRAF) {
       distanceX = e.clientX - startX;
@@ -480,6 +516,10 @@ function drag(e) {
 }
 
 function endDrag(e) {
+  if (isSliding) {
+    isSliding = false;
+    return;
+  }
   if (!isDragging) return;
   // console.log('Drag end');
   isDragging = false;
@@ -496,7 +536,8 @@ function endDrag(e) {
 
   map.setCenter([mapCenterLNG, mapCenterLAT]);
 
-  document.body.style.transform = `translate(0px, 0px)`;
+  document.body.style.transform = `translate(0, 0)`;
+  sliderWrapper.style.transform = `translate(-50%, 0)`;
 
   renderMap(true);
 }

@@ -44,8 +44,16 @@ function buildConfig({ watch } = {}) {
         targets: [
           { src: 'src/static/*', dest: distDir, dot: true },
           { src: 'data/*', dest: distDir, dot: true },
-          { src: 'harvester/covid/data-ltla.json', dest: distDir, rename: 'data-ltla.min.json' },
-          { src: 'harvester/covid/data-msoa.json', dest: distDir, rename: 'data-msoa.min.json' },
+          {
+            src: 'harvester/covid/temp/data-ltla.json',
+            dest: distDir,
+            rename: 'data-ltla.min.json',
+          },
+          {
+            src: 'harvester/covid/temp/data-msoa.json',
+            dest: distDir,
+            rename: 'data-msoa.min.json',
+          },
         ],
       }),
       createServiceWorkerPlugin(),
