@@ -36,18 +36,29 @@ window.addEventListener('mouseup', endDrag);
 
 var scaling = false;
 var lastDist;
-var centre;
+var twoFingerStart;
 window.ontouchstart = (e) => {
   console.log('t start');
-  if (e.touches.length === 2) {
+  if (e.touches.length === 1) {
+    startDrag({
+      target: {
+        tagName: '',
+      },
+      clientX: e.touches[0].pageX,
+      clientY: e.touches[0].pageY,
+    });
+  } else if (e.touches.length === 2) {
     scaling = true;
     lastDist = Math.hypot(
       e.touches[0].pageX - e.touches[1].pageX,
       e.touches[0].pageY - e.touches[1].pageY
     );
-    centre = [
-      (e.touches[0].pageX + e.touches[1].pageX) / 2,
-      (e.touches[0].pageY + e.touches[1].pageY) / 2,
+
+    twoFingerStart = [
+      e.touches[0].pageX,
+      e.touches[0].pageY,
+      e.touches[1].pageX,
+      e.touches[1].pageY,
     ];
   }
 };
@@ -57,15 +68,26 @@ window.ontouchmove = (e) => {
       e.touches[0].pageX - e.touches[1].pageX,
       e.touches[0].pageY - e.touches[1].pageY
     );
-    if (dist > lastDist) zoomIn(centre[0], centre[1]);
-    else zoomOut(centre[0], centre[1]);
+    // console.log(dist);
+    // if (dist > lastDist) zoomIn(centre[0], centre[1]);
+    // else zoomOut(centre[0], centre[1]);
     lastDist = dist;
+  } else if (e.touches.length === 1) {
+    drag({
+      clientX: e.touches[0].pageX,
+      clientY: e.touches[0].pageY,
+    });
   }
 };
 window.ontouchend = (e) => {
   if (scaling) {
     // pinchEnd(e);
     scaling = false;
+  } else if (e.changedTouches.length === 1 && e.touches.length === 0) {
+    endDrag({
+      clientX: e.changedTouches[0].pageX,
+      clientY: e.changedTouches[0].pageY,
+    });
   }
 };
 
@@ -466,6 +488,17 @@ function dragUpdate() {
   if (isDragging) {
     document.body.style.transform = `translate(${distanceX}px, ${distanceY}px)`;
     sliderWrapper.style.transform = `translate(calc(-50% - ${distanceX}px), ${-distanceY}px)`;
+  }
+}
+
+function zoomDrag(e) {
+  if (isZoomDragging) {
+    if (needForRAF) {
+      distanceX = e.clientX - startX;
+      distanceY = e.clientY - startY;
+      needForRAF = false;
+      requestAnimationFrame(zoomDragUpdate);
+    }
   }
 }
 
