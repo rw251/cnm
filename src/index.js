@@ -13,11 +13,6 @@ let mapCenterLNG = -2.6416415135265; //-2.5; // longitude
 let mapCenterLAT = 53.592328230096889; //54.5; //latitude
 let sliderMax;
 
-// Global vars to cache event state
-// used for pinch zooming
-var evCache = new Array();
-var prevDiff = -1;
-
 mapboxgl.accessToken =
   'pk.eyJ1IjoiMTIzNHJpY2hhcmR3aWxsaWFtcyIsImEiOiJja2Q3ZW1majkwMjFhMnRxcmhseDVpdWphIn0.-7Q7C7_uLQJgJqmPkgy-qw';
 var map = new mapboxgl.Map({
@@ -35,8 +30,8 @@ window.addEventListener('mousemove', drag);
 window.addEventListener('mouseup', endDrag);
 
 var scaling = false;
-var lastDist;
-var twoFingerStart;
+var twoFingerCentre;
+var initialDistance;
 window.ontouchstart = (e) => {
   console.log('t start');
   if (e.touches.length === 1) {
@@ -47,31 +42,20 @@ window.ontouchstart = (e) => {
       clientX: e.touches[0].pageX,
       clientY: e.touches[0].pageY,
     });
-  } else if (e.touches.length === 2) {
-    scaling = true;
-    lastDist = Math.hypot(
+  } else if (e.touches.length >= 2) {
+    initialDistance = Math.hypot(
       e.touches[0].pageX - e.touches[1].pageX,
       e.touches[0].pageY - e.touches[1].pageY
     );
-
-    twoFingerStart = [
-      e.touches[0].pageX,
-      e.touches[0].pageY,
-      e.touches[1].pageX,
-      e.touches[1].pageY,
+    twoFingerCentre = [
+      (e.touches[0].pageX + e.touches[1].pageX) / 2,
+      (e.touches[0].pageY + e.touches[1].pageY) / 2,
     ];
   }
 };
 window.ontouchmove = (e) => {
-  if (scaling) {
-    var dist = Math.hypot(
-      e.touches[0].pageX - e.touches[1].pageX,
-      e.touches[0].pageY - e.touches[1].pageY
-    );
-    // console.log(dist);
-    // if (dist > lastDist) zoomIn(centre[0], centre[1]);
-    // else zoomOut(centre[0], centre[1]);
-    lastDist = dist;
+  if (e.touches.length >= 2) {
+    zoomDrag(e.touches[0].pageX, e.touches[0].pageY, e.touches[1].pageX, e.touches[1].pageY);
   } else if (e.touches.length === 1) {
     drag({
       clientX: e.touches[0].pageX,
@@ -491,14 +475,30 @@ function dragUpdate() {
   }
 }
 
-function zoomDrag(e) {
-  if (isZoomDragging) {
-    if (needForRAF) {
-      distanceX = e.clientX - startX;
-      distanceY = e.clientY - startY;
-      needForRAF = false;
-      requestAnimationFrame(zoomDragUpdate);
-    }
+var fingerX;
+var fingerY;
+var dist;
+var scale;
+function zoomDragUpdate() {
+  needForRAF = true; // animation frame is happening now, so let another one queue up
+
+  // if (isDragging) {
+  document.body.style.transform = `translate(${fingerX - scale * twoFingerCentre[0]}px, ${
+    fingerY - scale * twoFingerCentre[1]
+  }px) scale(${scale})`;
+  // sliderWrapper.style.transform = `translate(calc(-50% - ${distanceX}px), ${-distanceY}px)`;
+  // }
+}
+
+function zoomDrag(x1, y1, x2, y2) {
+  if (needForRAF) {
+    dist = Math.hypot(x1 - x2, y1 - y2);
+    fingerX = (x1 + x2) / 2;
+    fingerY = (y1 + y2) / 2;
+    scale = dist / initialDistance;
+
+    needForRAF = false;
+    requestAnimationFrame(zoomDragUpdate);
   }
 }
 
