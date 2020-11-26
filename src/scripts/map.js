@@ -528,23 +528,36 @@ function zoomDrag(x1, y1, x2, y2) {
 function endZoomDrag() {
   console.log('endZD');
   isZoomDragging = false;
+
+  // get point under mouse in lat lng
+  const { lat, lng } = getMercator(
+    mapCentreX -
+      mapCanvas.width / 2 +
+      (mapCanvas.width / 2 + (-fingerX + scale * twoFingerCentre[0])) / scale,
+    mapCentreY -
+      mapCanvas.height / 2 +
+      (mapCanvas.height / 2 + (-fingerY + scale * twoFingerCentre[1])) / scale
+  );
+
+  // set new zoom based on scale factor
   zoom = zoom + Math.log2(scale);
-  // const { lat, lng } = getMercator(
-  //   mapCentreX - e.clientX + startX,
-  //   mapCentreY - e.clientY + startY
-  // );
 
-  // mapCenterLNG = lng; //mapCenterLNG - (e.clientX - startX) / scale;
-  // mapCenterLAT = lat; //mapCenterLAT + (e.clientY - startY) / scale;
-  // updateMapCentre();
-
-  // map.setCenter([mapCenterLNG, mapCenterLAT]);
-
+  // revert body and slider back to original position
   document.body.style.transform = `translate(0, 0)`;
   transformSlider(0, 0);
 
+  // get x.y of mouse lat lng in new zoom
+  const { x, y } = getWebMercator(lat, lng);
+
+  // update new map centre so that place under mouse
+  // doesn't move
+  mapCentreX = x;
+  mapCentreY = y;
+
   map.setZoom(zoom);
-  map.setCenter([mapCenterLNG, mapCenterLAT]);
+
+  const { lat: newMapCentreLat, lng: newMapCentreLng } = getMercator(mapCentreX, mapCentreY);
+  map.setCenter([newMapCentreLng, newMapCentreLat]);
 
   renderMap(true);
 }

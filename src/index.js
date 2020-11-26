@@ -20,7 +20,7 @@ window.addEventListener('mouseup', endDrag);
 var isDragging = false;
 var isZoomDragging = false;
 window.ontouchstart = (e) => {
-  console.log(e.touches.length);
+  if (e.target.tagName.toLowerCase() === 'input') return;
   if (e.touches.length === 1) {
     isDragging = true;
     startDrag({
@@ -37,7 +37,7 @@ window.ontouchstart = (e) => {
   }
 };
 window.ontouchmove = (e) => {
-  if (e.touches.length === 1) {
+  if (e.touches.length === 1 && isDragging) {
     drag({
       clientX: e.touches[0].pageX,
       clientY: e.touches[0].pageY,
@@ -47,7 +47,6 @@ window.ontouchmove = (e) => {
   }
 };
 window.ontouchend = (e) => {
-  console.log(e.touches.length, e.changedTouches.length);
   if (isDragging) {
     isDragging = false;
     endDrag({
