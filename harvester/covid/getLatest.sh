@@ -14,10 +14,10 @@ cd $BASE_DIR/cron/covid
 mkdir -p temp
 
 curl -sI 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' | \
-    awk -F"[ ,]+" '/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
+    awk -F"[ ,]+" 'BEGIN{IGNORECASE=1}/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
     > temp/ltla_last_updated
 curl -sI 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' | \
-    awk -F"[ ,]+" '/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
+    awk -F"[ ,]+" 'BEGIN{IGNORECASE=1}/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
     > temp/msoa_last_updated
 
 node shouldWeUpdate.js
