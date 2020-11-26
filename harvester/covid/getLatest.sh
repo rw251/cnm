@@ -13,24 +13,30 @@ cd $BASE_DIR/cron/covid
 
 mkdir -p temp
 
-wget -O temp/website_timestamp 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp'
+curl -sI 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' | \
+    awk -F"[ ,]+" '/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
+    > temp/ltla_last_updated
+curl -sI 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' | \
+    awk -F"[ ,]+" '/last-modified:/{for (i=2; i<=NF; i++)  printf $i " "}' \
+    > temp/msoa_last_updated
 
 node shouldWeUpdate.js
 
-FILE=temp/DO_IT
-if [ -f "$FILE" ]; then
-
-    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' > temp/msoa_data_latest.geojson
+LTLAFILE=temp/DO_LTLA
+if [ -f "$LTLAFILE" ]; then
     curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/ltla_data_latest.geojson' > temp/ltla_data_latest.geojson
-
-    node update.js
-
-    rm temp/DO_IT
-
-    cp temp/data-ltla.json $BASE_DIR/public_html/covid/data-ltla.json
-    cp temp/data-msoa.json $BASE_DIR/public_html/covid/data-msoa.json
-
+    node update-ltla.js
+    rm temp/DO_LTLA
+    cp temp/data-ltla.json ../../public_html/covid/data-ltla.json
     npm run minify-ltla
+fi
+
+MSOAFILE=temp/DO_MSOA
+if [ -f "$MSOAFILE" ]; then
+    curl --compressed 'https://coronavirus.data.gov.uk/downloads/maps/msoa_data_latest.geojson' > temp/msoa_data_latest.geojson
+    node update-msoa.js
+    rm temp/DO_MSOA
+    cp temp/data-msoa.json ../../public_html/covid/data-msoa.json
     npm run minify-msoa
 fi
 
