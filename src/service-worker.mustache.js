@@ -24,6 +24,7 @@ pcb.push('/'); // add root to cache
 
 const precacheFiles = [
   'msoa.json',
+  'msoa-names.json',
   'lad.json',
 ];
 

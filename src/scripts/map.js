@@ -175,7 +175,6 @@ function isPointInPolygon(pointX, pointY, polygonCoords, regionId) {
       }
     });
   });
-  // console.log(regionId, intersections);
   return intersections % 2 === 1;
 }
 
@@ -191,7 +190,6 @@ function dragUpdate() {
 }
 
 function drag(e) {
-  console.log('D');
   if (isSliding) return;
   if (isDragging) {
     if (needForRAF) {
@@ -239,13 +237,11 @@ function drag(e) {
 }
 
 function endDrag(e) {
-  console.log('endD');
   if (isSliding) {
     isSliding = false;
     return;
   }
   if (!isDragging) return;
-  // console.log('Drag end');
   isDragging = false;
   mapCanvas.classList.remove('dragging');
 
@@ -352,8 +348,10 @@ function updateHighlight() {
       drawArea(cachedGeoData[region].coordinates, region, true, 'rgba(255,0,0,0.5)');
     }
     document.getElementById('rate').innerText = cachedData[region].d[getSliderValue()];
+    document.getElementById('place').innerText = cachedGeoData[region].name || '';
   } else {
     document.getElementById('rate').innerText = '';
+    document.getElementById('place').innerText = '';
   }
 }
 
@@ -382,7 +380,6 @@ function drawBoundaries(withData) {
 }
 
 function zoomIn(pageX, pageY) {
-  console.log('ZI');
   if (zoom > maxZoom) return;
 
   // get point under mouse in lat lng
@@ -409,7 +406,6 @@ function zoomIn(pageX, pageY) {
 }
 
 function zoomOut(pageX, pageY) {
-  console.log('ZO');
   if (zoom <= minZoom) return;
 
   // get point under mouse in lat lng
@@ -481,7 +477,6 @@ function initializeMap() {
 }
 
 function startZoomDrag(e) {
-  console.log('startZD');
   isZoomDragging = true;
   initialDistance = Math.hypot(
     e.touches[0].pageX - e.touches[1].pageX,
@@ -497,7 +492,6 @@ var fingerY;
 var dist;
 var scale;
 function zoomDragUpdate() {
-  console.log('ZDU');
   needForRAF = true; // animation frame is happening now, so let another one queue up
 
   if (isZoomDragging) {
@@ -508,7 +502,6 @@ function zoomDragUpdate() {
 }
 
 function zoomDrag(x1, y1, x2, y2) {
-  console.log('ZD');
   if (needForRAF) {
     dist = Math.hypot(x1 - x2, y1 - y2);
     fingerX = (x1 + x2) / 2;
@@ -526,7 +519,6 @@ function zoomDrag(x1, y1, x2, y2) {
 }
 
 function endZoomDrag() {
-  console.log('endZD');
   isZoomDragging = false;
 
   // get point under mouse in lat lng

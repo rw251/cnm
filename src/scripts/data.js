@@ -11,18 +11,21 @@ function getMSOAData() {
 function loadGeoData() {
   return Promise.all([
     fetch('msoa.json').then((resp) => resp.json()),
+    fetch('msoa-names.json').then((resp) => resp.json()),
     fetch('lad.json').then((resp) => resp.json()),
-  ]).then(([msoaData, ladData]) => {
+  ]).then(([msoaData, msoaNames, ladData]) => {
     msoaData.features.forEach((feature) => {
       cachedMSOAGeoData[feature.properties.MSOA11CD] = {
         type: feature.geometry.type,
         coordinates: feature.geometry.coordinates,
+        name: msoaNames[feature.properties.MSOA11CD],
       };
     });
     ladData.features.forEach((feature) => {
       cachedLAGeoData[feature.properties.LAD19CD] = {
         type: feature.geometry.type,
         coordinates: feature.geometry.coordinates,
+        name: feature.properties.LAD19NM,
       };
     });
   });
